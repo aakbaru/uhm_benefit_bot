@@ -1,0 +1,11 @@
+{
+  "start": "👋 UHM JCB botiga xush kelibsiz!\nBo‘limni tanlang:",
+  "menu": [
+    "📊 Foyda hisoblagichi",
+    "📁 Model katalogi",
+    "🆚 Modellarni solishtirish",
+    "📞 Menejer bilan aloqa",
+    "🔒 Maxfiylik siyosati"
+  ],
+  "unknown": "🤖 So‘rovingizni tushunmadim. Menyudan birini tanlang 👇"
+}

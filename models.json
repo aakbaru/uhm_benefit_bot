@@ -1,0 +1,26 @@
+{
+  "Экскаваторы-погрузчики": [
+    {
+      "name": "JCB 3CX Eco",
+      "price": "1 027 000 000",
+      "image": "https://uhmlandtech.uz/uhm/wp-content/uploads/2019/11/3cx.jpg.webp",
+      "specs": {
+        "Мощность": "55 кВт",
+        "Масса": "7600 кг",
+        "Глубина копания": "4.24 м",
+        "Двигатель": "JCB EcoMAX"
+      }
+    },
+    {
+      "name": "JCB 3CX PRO",
+      "price": "1 280 000 000",
+      "image": "https://uhmlandtech.uz/uhm/wp-content/uploads/2019/11/3b2e2dc3a0d3727e6a28d4953f115e73.jpg.webp",
+      "specs": {
+        "Мощность": "68 кВт",
+        "Масса": "8200 кг",
+        "Глубина копания": "5.00 м",
+        "Двигатель": "JCB EcoMAX Plus"
+      }
+    }
+  ]
+}
