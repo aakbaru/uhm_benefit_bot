@@ -68,17 +68,31 @@ async def catalog(msg: types.Message):
         await msg.answer("Каталог пуст. Проверьте файл models.json.")
         return
 
-    for cat, items in MODELS.items():
-        await msg.answer(f"📂 Категория: {cat}")
-        for item in items:
-            caption = f"{item['name']} — {item['price']} сум"
-            if "specs" in item:
-                for k, v in item["specs"].items():
-                    caption += f"\n• {k}: {v}"
-            try:
-                await bot.send_photo(msg.chat.id, item["image"], caption=caption)
-            except:
-                await msg.answer(caption)
+    cat_kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    for cat in MODELS:
+        cat_kb.add(KeyboardButton(cat))
+    
+    await msg.answer("Выберите категорию техники:", reply_markup=cat_kb)
+
+
+@dp.message_handler(lambda m: m.text in MODELS)
+async def show_models_by_category(msg: types.Message):
+    uid = msg.from_user.id
+    cat = msg.text
+    items = MODELS[cat]
+
+    for item in items:
+        caption = f"{item['name']} — {item['price']} сум"
+        if "specs" in item:
+            for k, v in item["specs"].items():
+                caption += f"\n• {k}: {v}"
+        try:
+            await bot.send_photo(msg.chat.id, item["image"], caption=caption)
+        except:
+            await msg.answer(caption)
+
+    await msg.answer("⬅ Вернуться в меню", reply_markup=get_menu(uid))
+
 
 
 @dp.message_handler(lambda m: m.text.startswith("📊"))
