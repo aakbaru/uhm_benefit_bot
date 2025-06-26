@@ -8,7 +8,11 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils import executor
 import logging
 import json
+from aiogram import Bot
+import asyncio
 
+async def drop_pending_updates(bot: Bot):
+    await bot.get_updates(offset=-1)
 import os
 API_TOKEN = os.getenv("BOT_TOKEN")
 
@@ -281,7 +285,10 @@ async def unknown(msg: types.Message):
 if __name__ == "__main__":
     print("✅ Бот запущен")
     from aiogram import executor
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(drop_pending_updates(bot))
     executor.start_polling(dp, skip_updates=True)
+
 
 
 
