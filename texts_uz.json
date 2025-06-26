@@ -1,11 +1,23 @@
 {
-  "start": "👋 UHM JCB botiga xush kelibsiz!\nBo‘limni tanlang:",
+  "start": "👋 UHM JCB botiga xush kelibsiz!\nQiziqqan bo‘limni tanlang:",
   "menu": [
-    "📊 Foyda hisoblagichi",
-    "📁 Model katalogi",
+    "📊 Foyda kalkulyatori",
+    "📁 Modellar katalogi",
     "🆚 Modellarni solishtirish",
-    "📞 Menejer bilan aloqa",
+    "📞 Menejer bilan bog‘lanish",
     "🔒 Maxfiylik siyosati"
   ],
-  "unknown": "🤖 So‘rovingizni tushunmadim. Menyudan birini tanlang 👇"
+  "catalog": "📁 Modellar katalogi",
+  "back": "⬅ Orqaga",
+  "select_category": "Texnika turini tanlang:",
+  "empty_catalog": "Katalog bo‘sh. models.json faylini tekshiring.",
+  "unknown": "🤖 Tushunmadim. Quyidagi menyudan biror bo‘limni tanlang 👇",
+  "contact": "📞 Menejer bilan bog‘lanish:\n@UHMLT\n+998 90 977 31 35",
+  "privacy": "🔒 Maxfiylik siyosati:\nMa'lumotlaringiz himoyalangan va uchinchi shaxslarga uzatilmaydi.",
+  "calculator": "📊 Foyda kalkulyatori",
+  "comparison": "🆚 Modellarni solishtirish",
+  "no_models_in_category": "Bu kategoriyada hali modellar yo‘q.",
+  "choose_model": "Modelni tanlang:",
+  "choose_second_model": "Solishtirish uchun ikkinchi modelni tanlang:",
+  "comparison_result": "📈 Modellarni solishtirish:"
 }

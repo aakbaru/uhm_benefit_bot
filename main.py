@@ -61,18 +61,20 @@ async def policy(msg: types.Message):
     )
 
 
-@dp.message_handler(lambda m: m.text.startswith("📁"))
+@dp.message_handler(lambda m: m.text == get_text(m.from_user.id, "catalog"))
 async def catalog(msg: types.Message):
     uid = msg.from_user.id
     if not MODELS:
-        await msg.answer("Каталог пуст. Проверьте файл models.json.")
+        await msg.answer(get_text(uid, "empty_catalog"))
         return
 
     cat_kb = ReplyKeyboardMarkup(resize_keyboard=True)
     for cat in MODELS:
         cat_kb.add(KeyboardButton(cat))
-    
-    await msg.answer("Выберите категорию техники:", reply_markup=cat_kb)
+    cat_kb.add(KeyboardButton(get_text(uid, "back")))
+
+    await msg.answer(get_text(uid, "choose_category"), reply_markup=cat_kb)
+
 
 
 @dp.message_handler(lambda m: m.text in MODELS)
