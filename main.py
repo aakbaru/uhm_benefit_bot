@@ -303,16 +303,24 @@ async def unknown(msg: types.Message):
 if __name__ == "__main__":
     print("✅ Бот запущен")
     from aiogram import executor
+from aiohttp import web
 
-async def on_startup(dp):
-    await bot.delete_webhook(drop_pending_updates=True)
+async def on_startup(app):
+    await bot.set_webhook("https://uhm-bot.onrender.com/webhook")  # ЗАМЕНИ НА СВОЙ URL
+
+async def on_shutdown(app):
+    await bot.delete_webhook()
+
+def start():
+    from aiogram import web
+
+    app = web.Application()
+    app.router.add_post("/webhook", dp.router)  # Webhook endpoint
+    app.on_startup.append(on_startup)
+    app.on_shutdown.append(on_shutdown)
+    web.run_app(app, port=int(os.environ.get("PORT", 5000)))
 
 if __name__ == "__main__":
-   from aiogram import executor
+    start()
 
-async def on_startup(dp):
-    await bot.delete_webhook(drop_pending_updates=True)
-
-if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
  
