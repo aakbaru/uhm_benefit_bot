@@ -226,29 +226,7 @@ async def calc_service(msg: types.Message, state: FSMContext):
 
     await state.finish()
 
-    await state.update_data(service=int(msg.text))
-    data = await state.get_data()
-    model = data["model"]
-    machine_price = int(model["price"].replace(" ", ""))
-    fuel_total = data['fuel'] * data['days'] * data['fuel_price']
-    own_cost = data['salary'] + fuel_total + data['service']
-    saving = data['rent'] - own_cost
-
-    if saving <= 0:
-        await msg.answer(
-            f"❗ По введённым данным техника не даёт выгоды.\n"
-            f"Вы тратите {int(own_cost):,} сум/мес, а аренда стоит {int(data['rent']):,} сум.\n"
-            f"Попробуйте изменить параметры, чтобы увидеть реальную выгоду.",
-            reply_markup=get_menu(msg.from_user.id)
-        )
-    else:
-        payback = round(machine_price / saving, 1)
-        await msg.answer(
-            f"✅ Вы экономите ~{int(saving):,} сум в месяц\n"
-            f"📉 Срок окупаемости {model['name']}: {payback} мес.",
-            reply_markup=get_menu(msg.from_user.id)
-        )
-    await state.finish()
+   
 
 # ========== СРАВНЕНИЕ МОДЕЛЕЙ ==========
 compare_state = {}
@@ -303,9 +281,8 @@ async def unknown(msg: types.Message):
 if __name__ == "__main__":
     print("✅ Бот запущен")
     from aiogram import executor
-if __name__ == "__main__":
-    from aiogram import executor
     executor.start_polling(dp, skip_updates=True)
+
 
 
  
