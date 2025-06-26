@@ -4,6 +4,12 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
+@dp.message_handler(commands=["start"])
+async def start(msg: types.Message, state: FSMContext):
+    await state.finish()  # Завершить все предыдущие состояния (например, калькулятор)
+    lang_kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    lang_kb.add("🇷🇺 Русский", "🇺🇿 O‘zbekcha")
+    await msg.answer("🇷🇺 Выберите язык / 🇺🇿 Tilni tanlang", reply_markup=lang_kb)
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils import executor
 import logging
@@ -16,13 +22,6 @@ async def drop_pending_updates(bot: Bot):
 import os
 API_TOKEN = os.getenv("BOT_TOKEN")
 
-user_lang = {}
-
-with open("texts_ru.json", encoding="utf-8") as f:
-    texts_ru = json.load(f)
-
-with open("texts_uz.json", encoding="utf-8") as f:
-    texts_uz = json.load(f)
 
 TEXTS = {
     "ru": texts_ru,
@@ -89,11 +88,9 @@ async def policy(msg: types.Message):
 @dp.message_handler(lambda m: m.text == get_text(m.from_user.id, "catalog"))
 async def catalog(msg: types.Message):
     uid = msg.from_user.id
-   if uid not in user_lang:
-    await msg.answer("Сначала выберите язык.")
-    return
- 
-
+    if uid not in user_lang:
+        await msg.answer("Сначала выберите язык.")
+        return
 
     cat_kb = ReplyKeyboardMarkup(resize_keyboard=True)
     for cat in MODELS:
@@ -101,6 +98,7 @@ async def catalog(msg: types.Message):
     cat_kb.add(KeyboardButton(get_text(uid, "back")))
 
     await msg.answer(get_text(uid, "choose_category"), reply_markup=cat_kb)
+
 
 
 
