@@ -51,14 +51,16 @@ def get_menu(uid):
 
 class CalcForm(StatesGroup):
     model = State()
-    hours = State()
-    days = State()
-    months = State()
-    rent = State()
-    salary = State()
-    fuel = State()
+    hours_per_day = State()
+    days_per_month = State()
+    months_total = State()
+    rent_per_month = State()
+    operator_salary = State()
+    fuel_per_day = State()
     fuel_price = State()
-    service = State()
+    service_cost = State()
+
+    
 
 @dp.message_handler(commands=["start"])
 async def start(msg: types.Message):
@@ -70,6 +72,21 @@ async def start(msg: types.Message):
 async def set_lang(msg: types.Message):
     user_lang[msg.from_user.id] = "ru" if "Рус" in msg.text else "uz"
     await msg.answer(get_text(msg.from_user.id, "start"), reply_markup=get_menu(msg.from_user.id))
+
+
+@dp.message_handler(lambda m: m.text == get_text(m.from_user.id, "calculator"))
+async def start_calc(msg: types.Message):
+    uid = msg.from_user.id
+
+    if uid not in user_lang:
+        await msg.answer("Сначала выберите язык.")
+        return
+
+    user_state[uid] = {"step": "enter_price"}
+    await msg.answer("Введите цену техники в сумах:")
+
+
+
 
 @dp.message_handler(lambda m: m.text.startswith("📞"))
 async def contact(msg: types.Message):
@@ -122,114 +139,129 @@ async def show_models_by_category(msg: types.Message):
 
 
 
-@dp.message_handler(lambda m: m.text.startswith("📊"))
+@dp.message_handler(lambda m: m.text in ["🇷🇺 Русский", "🇺🇿 O‘zbekcha"])
+async def set_lang(msg: types.Message):
+    user_lang[msg.from_user.id] = "ru" if "Рус" in msg.text else "uz"
+    await msg.answer(get_text(msg.from_user.id, "start"), reply_markup=get_menu(msg.from_user.id))
+
+
+@dp.message_handler(lambda m: m.text == get_text(m.from_user.id, "calculator"))
 async def start_calc(msg: types.Message):
-    text = "Выберите модель техники:"
-    buttons = []
-    for cat, items in MODELS.items():
-        for item in items:
-            buttons.append(item["name"])
-    markup = ReplyKeyboardMarkup(resize_keyboard=True)
-    for btn in buttons:
-        markup.add(KeyboardButton(btn))
-    await msg.answer(text, reply_markup=markup)
+    uid = msg.from_user.id
+    models_list = [model["name"] for cat in MODELS.values() for model in cat]
+    kb = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    for model in models_list:
+        kb.add(KeyboardButton(model))
+    kb.add(KeyboardButton(get_text(uid, "back")))
+
+    await msg.answer(get_text(uid, "choose_model"), reply_markup=kb)
     await CalcForm.model.set()
 
+
 @dp.message_handler(state=CalcForm.model)
-async def calc_model(msg: types.Message, state: FSMContext):
-    selected = msg.text
-    for items in MODELS.values():
-        for item in items:
-            if item["name"] == selected:
-                await state.update_data(model=item)
-                await msg.answer("Сколько часов в день используется техника?")
-                await CalcForm.next()
-                return
-    await msg.answer("Модель не найдена, выберите из списка.")
-
-@dp.message_handler(state=CalcForm.hours)
 async def calc_hours(msg: types.Message, state: FSMContext):
-    await state.update_data(hours=int(msg.text))
-    await msg.answer("Сколько дней в месяц работает техника?")
+    await state.update_data(model=msg.text)
+    await msg.answer("⌚ Сколько часов в день работает техника?")
     await CalcForm.next()
 
-@dp.message_handler(state=CalcForm.days)
+@dp.message_handler(state=CalcForm.hours_per_day)
 async def calc_days(msg: types.Message, state: FSMContext):
-    await state.update_data(days=int(msg.text))
-    await msg.answer("Сколько месяцев планируете владеть техникой?")
+    await state.update_data(hours_per_day=int(msg.text))
+    await msg.answer("📅 Сколько дней в месяц техника используется?")
     await CalcForm.next()
 
-@dp.message_handler(state=CalcForm.months)
+@dp.message_handler(state=CalcForm.days_per_month)
 async def calc_months(msg: types.Message, state: FSMContext):
-    await state.update_data(months=int(msg.text))
-    await msg.answer("Сколько вы платите за аренду техники в месяц?")
+    await state.update_data(days_per_month=int(msg.text))
+    await msg.answer("📆 На сколько месяцев рассчитывается использование?")
     await CalcForm.next()
 
-@dp.message_handler(state=CalcForm.rent)
+@dp.message_handler(state=CalcForm.months_total)
 async def calc_rent(msg: types.Message, state: FSMContext):
-    await state.update_data(rent=int(msg.text))
-    await msg.answer("Какая будет зарплата оператора?")
+    await state.update_data(months_total=int(msg.text))
+    await msg.answer("💸 Сколько стоит аренда техники в месяц?")
     await CalcForm.next()
 
-@dp.message_handler(state=CalcForm.salary)
+@dp.message_handler(state=CalcForm.rent_per_month)
 async def calc_salary(msg: types.Message, state: FSMContext):
-    await state.update_data(salary=int(msg.text))
-    await msg.answer("Сколько литров топлива расходуется в день?")
+    await state.update_data(rent_per_month=int(msg.text))
+    await msg.answer("👷 Зарплата оператора в месяц?")
     await CalcForm.next()
 
-@dp.message_handler(state=CalcForm.fuel)
-async def calc_fuel(msg: types.Message, state: FSMContext):
-    await state.update_data(fuel=float(msg.text))
-    await msg.answer("Сколько стоит 1 литр топлива?")
+@dp.message_handler(state=CalcForm.operator_salary)
+async def calc_fuel_per_day(msg: types.Message, state: FSMContext):
+    await state.update_data(operator_salary=int(msg.text))
+    await msg.answer("⛽ Сколько литров топлива расходуется в день?")
+    await CalcForm.next()
+
+@dp.message_handler(state=CalcForm.fuel_per_day)
+async def calc_fuel_price(msg: types.Message, state: FSMContext):
+    await state.update_data(fuel_per_day=int(msg.text))
+    await msg.answer("💰 Цена за литр топлива?")
     await CalcForm.next()
 
 @dp.message_handler(state=CalcForm.fuel_price)
-async def calc_fuel_price(msg: types.Message, state: FSMContext):
-    await state.update_data(fuel_price=float(msg.text))
-    await msg.answer("Сколько в месяц стоит обслуживание?")
+async def calc_service(msg: types.Message, state: FSMContext):
+    await state.update_data(fuel_price=int(msg.text))
+    await msg.answer("🔧 Расходы на обслуживание за всё время?")
     await CalcForm.next()
 
-@dp.message_handler(state=CalcForm.service)
-async def calc_service(msg: types.Message, state: FSMContext):
-    await state.update_data(service=int(msg.text))
+
+@dp.message_handler(state=CalcForm.service_cost)
+async def finish_calc(msg: types.Message, state: FSMContext):
+    await state.update_data(service_cost=int(msg.text))
     data = await state.get_data()
-    model = data["model"]
-    machine_price = int(model["price"].replace(" ", ""))
-    fuel_total = data['fuel'] * data['days'] * data['fuel_price']
-    own_cost = data['salary'] + fuel_total + data['service']
-    saving = data['rent'] - own_cost
+
+    model_name = data["model"]
+    model = None
+    for cat_items in MODELS.values():
+        for item in cat_items:
+            if item["name"] == model_name:
+                model = item
+                break
+        if model:
+            break
+
+    if not model:
+        await msg.answer("❌ Модель не найдена.", reply_markup=get_menu(msg.from_user.id))
+        await state.finish()
+        return
+
+    # Расчёт
+    hours_per_day = data["hours_per_day"]
+    days_per_month = data["days_per_month"]
+    months_total = data["months_total"]
+    rent_per_month = data["rent_per_month"]
+    operator_salary = data["operator_salary"]
+    fuel_per_day = data["fuel_per_day"]
+    fuel_price = data["fuel_price"]
+    service_cost = data["service_cost"]
+
+    fuel_total = fuel_per_day * fuel_price * days_per_month * months_total
+    own_cost = operator_salary * months_total + fuel_total + service_cost
+    rent_total = rent_per_month * months_total
+    saving = rent_total - own_cost
+
+    try:
+        price = int(model["price"].replace(" ", ""))
+    except:
+        price = 0
 
     if saving <= 0:
         await msg.answer(
             f"❗ По введённым данным техника не даёт выгоды.\n"
-            f"Вы тратите {int(own_cost):,} сум/мес, а аренда стоит {int(data['rent']):,} сум.\n"
-            f"Попробуйте изменить параметры, чтобы увидеть реальную выгоду.",
+            f"Вы тратите {own_cost:,} сум, а аренда стоит {rent_total:,} сум.",
             reply_markup=get_menu(msg.from_user.id)
         )
     else:
-        payback = round(machine_price / saving, 1)
-        response = (
-            f"✅ Вы экономите ~{int(saving):,} сум в месяц\n"
-            f"📉 Срок окупаемости {model['name']}: {payback} мес."
+        payback = round(price / (saving / months_total), 1) if price else 0
+        text = (
+            f"✅ Вы экономите ~{saving:,} сум за {months_total} мес.\n"
+            f"📉 Срок окупаемости: {payback} мес."
         )
-
-        if payback > 24:
-            # Ищем другую модель из той же категории с меньшей ценой
-            suggestion = None
-            for cat, items in MODELS.items():
-                if model in items:
-                    cheaper = [m for m in items if int(m["price"].replace(" ", "")) < machine_price and m != model]
-                    if cheaper:
-                        suggestion = min(cheaper, key=lambda m: int(m["price"].replace(" ", "")))
-                    break
-
-            if suggestion:
-                response += f"\n\n💡 Попробуйте {suggestion['name']} — дешевле на {machine_price - int(suggestion['price'].replace(' ', '')):,} сум."
-
-        await msg.answer(response, reply_markup=get_menu(msg.from_user.id))
+        await msg.answer(text, reply_markup=get_menu(msg.from_user.id))
 
     await state.finish()
-
    
 
 # ========== СРАВНЕНИЕ МОДЕЛЕЙ ==========
