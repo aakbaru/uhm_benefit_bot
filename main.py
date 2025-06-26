@@ -68,23 +68,6 @@ async def start(msg: types.Message):
     lang_kb.add("🇷🇺 Русский", "🇺🇿 O‘zbekcha")
     await msg.answer("🇷🇺 Выберите язык / 🇺🇿 Tilni tanlang", reply_markup=lang_kb)
 
-@dp.message_handler(lambda m: m.text in ["🇷🇺 Русский", "🇺🇿 O‘zbekcha"])
-async def set_lang(msg: types.Message):
-    user_lang[msg.from_user.id] = "ru" if "Рус" in msg.text else "uz"
-    await msg.answer(get_text(msg.from_user.id, "start"), reply_markup=get_menu(msg.from_user.id))
-
-
-@dp.message_handler(lambda m: m.text == get_text(m.from_user.id, "calculator"))
-async def start_calc(msg: types.Message):
-    uid = msg.from_user.id
-
-    if uid not in user_lang:
-        await msg.answer("Сначала выберите язык.")
-        return
-
-    user_state[uid] = {"step": "enter_price"}
-    await msg.answer("Введите цену техники в сумах:")
-
 
 
 
@@ -106,9 +89,11 @@ async def policy(msg: types.Message):
 @dp.message_handler(lambda m: m.text == get_text(m.from_user.id, "catalog"))
 async def catalog(msg: types.Message):
     uid = msg.from_user.id
-    if not MODELS:
-        await msg.answer(get_text(uid, "empty_catalog"))
-        return
+   if uid not in user_lang:
+    await msg.answer("Сначала выберите язык.")
+    return
+ 
+
 
     cat_kb = ReplyKeyboardMarkup(resize_keyboard=True)
     for cat in MODELS:
@@ -148,6 +133,9 @@ async def set_lang(msg: types.Message):
 @dp.message_handler(lambda m: m.text == get_text(m.from_user.id, "calculator"))
 async def start_calc(msg: types.Message):
     uid = msg.from_user.id
+    if uid not in user_lang:
+        await msg.answer("Сначала выберите язык.")
+        return
     models_list = [model["name"] for cat in MODELS.values() for model in cat]
     kb = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     for model in models_list:
