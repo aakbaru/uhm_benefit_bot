@@ -12,6 +12,20 @@ import json
 import os
 API_TOKEN = os.getenv("BOT_TOKEN")
 
+user_lang = {}
+
+with open("texts_ru.json", encoding="utf-8") as f:
+    texts_ru = json.load(f)
+
+with open("texts_uz.json", encoding="utf-8") as f:
+    texts_uz = json.load(f)
+
+TEXTS = {
+    "ru": texts_ru,
+    "uz": texts_uz
+}
+
+
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 logging.basicConfig(level=logging.INFO)
@@ -21,8 +35,15 @@ with open("texts_ru.json", encoding="utf-8") as f: TEXTS_RU = json.load(f)
 with open("texts_uz.json", encoding="utf-8") as f: TEXTS_UZ = json.load(f)
 with open("models.json", encoding="utf-8") as f: MODELS = json.load(f)
 
-def get_text(uid, key): return (TEXTS_RU if user_lang.get(uid, "ru") == "ru" else TEXTS_UZ).get(key, "⛔")
-def get_menu(uid): return ReplyKeyboardMarkup(resize_keyboard=True).add(*[KeyboardButton(txt) for txt in get_text(uid, "menu")])
+def get_text(uid, key):
+    lang = user_lang.get(uid, "ru")
+    return TEXTS.get(lang, {}).get(key, "❓")
+def get_menu(uid):
+    lang = user_lang.get(uid, "ru")
+    kb = ReplyKeyboardMarkup(resize_keyboard=True)
+    for btn in TEXTS.get(lang, {}).get("menu", []):
+        kb.add(KeyboardButton(btn))
+    return kb
 
 class CalcForm(StatesGroup):
     model = State()
