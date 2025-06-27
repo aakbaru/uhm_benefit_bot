@@ -1,23 +1,27 @@
 {
-  "start": "👋 UHM JCB botiga xush kelibsiz!\nQuyidagi bo'limlardan birini tanlang:",
-  "menu": [
-    "📊 Foyda kalkulyatori",
-    "📁 Modellar katalogi",
-    "🆚 Modellarni taqqoslash",
-    "📞 Menejer bilan bog‘lanish",
-    "🔒 Maxfiylik siyosati"
-  ],
-  "catalog": "📁 Modellar katalogi",
-  "back": "⬅ Ortga",
+  "start": "UHM JCB botiga xush kelibsiz! Harakatni tanlang:",
+  "menu": ["📖 Katalog", "🧮 Kalkulyator", "🆚 Solishtirish", "📞 Aloqa", "🔒 Maxfiylik"],
+  "unknown": "Noma'lum buyruq. Iltimos, menyu tugmalaridan foydalaning.",
+  "back": "⬅ Orqaga",
   "choose_category": "Texnika toifasini tanlang:",
-  "empty_catalog": "Katalog bo'sh. Iltimos, models.json faylini tekshiring.",
-  "unknown": "🤖 Tushunmadim. Iltimos, quyidagi menyudan tanlang 👇",
-  "contact": "📞 Menejer bilan bog‘lanish:\n@UHMLT\n+998 90 977 31 35",
-  "privacy": "🔒 Maxfiylik siyosati:\nMa'lumotlaringiz xavfsiz saqlanadi va uchinchi shaxslarga uzatilmaydi.",
-  "calculator": "📊 Foyda kalkulyatori",
-  "comparison": "🆚 Modellarni taqqoslash",
-  "no_models_in_category": "Bu toifada hozircha modellar yo'q.",
-  "choose_model": "Modelni tanlang:",
-  "choose_second_model": "Taqqoslash uchun ikkinchi modelni tanlang:",
-  "comparison_result": "📈 Modellarni taqqoslash natijasi:"
+  "choose_model": "Hisoblash uchun modelni tanlang:",
+  "calculator": "🧮 Kalkulyator",
+  "catalog": "📖 Katalog",
+  "compare": "🆚 Solishtirish",
+  "calculator_results": "📊 Hisoblash natijalari:\n\nTejamkorlik: {saving} so'm\nO'zini oqlash muddati: {payback} oy",
+  "comparison_title": "🆚 Modellarni solishtirish",
+  "contact_manager": "👨‍💼 Menejer: {manager}",
+  "contact_phone": "📱 Telefon: {phone}",
+  "policy_text": "🔐 Maxfiylik siyosati",
+  "social_media": "📢 Ijtimoiy tarmoqlarimiz:",
+  "error_message": "⚠ Xatolik yuz berdi. Iltimos, keyinroq urinib ko'ring.",
+  "model_not_found": "❌ Model topilmadi. Iltimos, ro'yxatdan tanlang.",
+  "invalid_input": "❌ Noto'g'ri kiritish. Iltimos, raqam kiriting.",
+  "no_saving": "❗ Kiritilgan ma'lumotlarga ko'ra texnika foyda keltirmaydi.",
+  "saving": "✅ Siz {months} oy davomida ~{saving} so'm tejaysiz.",
+  "payback": "📉 O'zini oqlash muddati: {payback} oy",
+  "own_cost": "🔹 Shaxsiy xarajatlar: {cost} so'm",
+  "rent_cost": "🔹 Ijaraning narxi: {cost} so'm"
 }
+
+
