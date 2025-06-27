@@ -1,46 +1,62 @@
 
 # -*- coding: utf-8 -*-
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types, executor
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
-@dp.message_handler(commands=["start"])
-async def start(msg: types.Message, state: FSMContext):
-    await state.finish()  # Завершить все предыдущие состояния (например, калькулятор)
-    lang_kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    lang_kb.add("🇷🇺 Русский", "🇺🇿 O‘zbekcha")
-    await msg.answer("🇷🇺 Выберите язык / 🇺🇿 Tilni tanlang", reply_markup=lang_kb)
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram.utils import executor
 import logging
 import json
-from aiogram import Bot
 import asyncio
-
-async def drop_pending_updates(bot: Bot):
-    await bot.get_updates(offset=-1)
 import os
-API_TOKEN = os.getenv("BOT_TOKEN")
+logging.basicConfig(level=logging.DEBUG)  # Для подробных логов
 
-
-TEXTS = {
-    "ru": texts_ru,
-    "uz": texts_uz
+REQUIRED_KEYS = {
+    'texts_ru.json': ['start', 'menu', 'unknown'],
+    'texts_uz.json': ['start', 'menu', 'unknown'],
+    'models.json': []
 }
 
+def validate_data():
+    """Проверяет наличие обязательных ключей в JSON-файлах"""
+    for file, keys in REQUIRED_KEYS.items():
+        try:
+            with open(file, encoding='utf-8') as f:
+                data = json.load(f)
+                for key in keys:
+                    if key not in data:
+                        raise ValueError(f"Ключ '{key}' отсутствует в {file}")
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Файл {file} не найден")
 
+# 1. Инициализация бота и хранилища
+API_TOKEN = os.getenv("BOT_TOKEN") or "7840849477:AAEVjaJYKCgRU_2-Dx-XtgeSVR8BWIU8TcM"  # Запасной токен
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 logging.basicConfig(level=logging.INFO)
 
-user_lang = {}
-with open("texts_ru.json", encoding="utf-8") as f: TEXTS_RU = json.load(f)
-with open("texts_uz.json", encoding="utf-8") as f: TEXTS_UZ = json.load(f)
-with open("models.json", encoding="utf-8") as f: MODELS = json.load(f)
+# 2. Загрузка данных с обработкой ошибок
+try:
+    with open("texts_ru.json", encoding="utf-8") as f: 
+        TEXTS_RU = json.load(f)
+    with open("texts_uz.json", encoding="utf-8") as f: 
+        TEXTS_UZ = json.load(f)
+    with open("models.json", encoding="utf-8") as f: 
+        MODELS = json.load(f)
+except Exception as e:
+    logging.error(f"Ошибка загрузки файлов: {e}")
+    exit(1)
 
+# 3. Глобальные переменные
+user_lang = {}
+TEXTS = {"ru": TEXTS_RU, "uz": TEXTS_UZ}
+compare_state = {}
+
+# 4. Вспомогательные функции
 def get_text(uid, key):
     lang = user_lang.get(uid, "ru")
     return TEXTS.get(lang, {}).get(key, "❓")
+
 def get_menu(uid):
     lang = user_lang.get(uid, "ru")
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
@@ -48,6 +64,10 @@ def get_menu(uid):
         kb.add(KeyboardButton(btn))
     return kb
 
+async def drop_pending_updates():
+    await bot.delete_webhook(drop_pending_updates=True)
+
+    # 5. Состояния для калькулятора
 class CalcForm(StatesGroup):
     model = State()
     hours_per_day = State()
@@ -59,15 +79,19 @@ class CalcForm(StatesGroup):
     fuel_price = State()
     service_cost = State()
 
-    
 
-@dp.message_handler(commands=["start"])
-async def start(msg: types.Message):
+# 6. Основные обработчики
+@dp.message_handler(commands=["start", "help"])
+async def start_handler(msg: types.Message, state: FSMContext):
+    await state.finish()
     lang_kb = ReplyKeyboardMarkup(resize_keyboard=True)
     lang_kb.add("🇷🇺 Русский", "🇺🇿 O‘zbekcha")
     await msg.answer("🇷🇺 Выберите язык / 🇺🇿 Tilni tanlang", reply_markup=lang_kb)
 
-
+@dp.message_handler(lambda m: m.text in ["🇷🇺 Русский", "🇺🇿 O‘zbekcha"])
+async def set_lang_handler(msg: types.Message):
+    user_lang[msg.from_user.id] = "ru" if "Рус" in msg.text else "uz"
+    await msg.answer(get_text(msg.from_user.id, "start"), reply_markup=get_menu(msg.from_user.id))
 
 
 @dp.message_handler(lambda m: m.text.startswith("📞"))
@@ -301,11 +325,17 @@ async def unknown(msg: types.Message):
     await msg.answer(get_text(msg.from_user.id, "unknown"), reply_markup=get_menu(msg.from_user.id))
 
 if __name__ == "__main__":
-    print("✅ Бот запущен")
-    from aiogram import executor
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(drop_pending_updates(bot))
-    executor.start_polling(dp, skip_updates=True)
+    try:
+        validate_data()  # Проверка данных перед запуском
+        print("✅ Проверка данных успешна")
+        
+        print("🟢 Бот запускается...")
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(drop_pending_updates())
+        executor.start_polling(dp, skip_updates=True)
+    except Exception as e:
+        logging.error(f"Ошибка запуска: {e}")
+        exit(1)
 
 
 
